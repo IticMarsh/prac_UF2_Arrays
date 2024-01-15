@@ -5,10 +5,27 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Document</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-	<div id="resultat"></div>
+	<!-- BOTONS -->
+
 	<button onclick="reloadPage()">Recarregar Pàgina</button>
+	<button onclick="orderList('asc')">Ordenar Ascendente</button>
+	<button onclick="orderList('desc')">Ordenar Descendente</button>
+	<input type="text" id="searchInput" placeholder="Nombre del Pokémon">
+	<button onclick="searchList()">Buscar</button>
+	<button onclick="calcMitjana()">Mitjana</button>
+	<button onclick="printList()">Imprimir</button>
+	<!-- TAULA -->
+	<div id="resultat"></div>
+	
+	<!-- GRAFICS -->
+	<div class="chart-container" style="position: relative; width:700px">
+		<canvas id="myChart"></canvas>
+		</div>
+
 	<script src="js/script.js"></script>
 </body>
 </html>
