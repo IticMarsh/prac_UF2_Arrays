@@ -4,6 +4,9 @@ let moviesData;
 let earthMeteoritesData;
 let combinedDataArray = [];
 
+
+
+
 function reloadPage() {
   location.reload();
 }
@@ -225,30 +228,71 @@ fetch("js/data/pokemon.json")
 
 
 
-  //GRÀFIC
+  // ******** GRÀFIC ********
 
-  // const ctx = document.getElementById('myChart');
+  // Arrays vacíos
+const arrayLabels = [
+  "Grass",
+  "Poison",
+  "Fire",
+  "Flying",
+  "Water",
+  "Bug",
+  "Normal",
+  "Electric",
+  "Ground",
+  "Fighting",
+  "Psychic",
+  "Rock",
+  "Ice",
+  "Ghost",
+  "Dragon"
+];
+const arrayDadesGraf = [14, 33, 12, 19, 32, 12, 24, 9, 14, 8, 14, 11, 5, 3, 3];
 
-  // new Chart(ctx, {
-  //   type: 'bar',
-  //   data: {
-  //     labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-  //     datasets: [{
-  //       label: '# of Votes',
-  //       data: [12, 19, 3, 5, 2, 3],
-  //       borderWidth: 1
-  //     }]
-  //   },
-  //   options: {
-  //     scales: {
-  //       y: {
-  //         beginAtZero: true
-  //       }
-  //     }
-  //   }
-  // });
+// Generar un array para el borderColor
+const borderColorArray = Array.from({ length: arrayLabels.length }, () => getRandomColor());
+
+// Generar un array para el backgroundColor con opacidad
+const backgroundColorArray = borderColorArray ;
 
 
+// Función para generar un número aleatorio entre min y max
+function getRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Función para generar un color rgba aleatorio
+function getRandomColor() {
+  const r = getRandomNumber(0, 255);
+  const g = getRandomNumber(0, 255);
+  const b = getRandomNumber(0, 255);
+  return `rgba(${r},${g},${b})`;
+}
+
+// Usar los arrays generados en el gráfico
+const ctx = document.getElementById('myChart');
+
+new Chart(ctx, {
+  type: 'polarArea',
+  data: {
+    labels: arrayLabels,
+    datasets: [{
+      label: '# of Votes',
+      data: arrayDadesGraf,
+      borderWidth: 1,
+      borderColor: borderColorArray,
+      backgroundColor: backgroundColorArray
+    }]
+  },
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
 /*
 // MUNICIPIS
 fetch("js/data/municipis.json")
