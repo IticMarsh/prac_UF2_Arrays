@@ -2,74 +2,189 @@ let pokemonData;
 let municipisData;
 let moviesData;
 let earthMeteoritesData;
+let pokemonArray = [];
+let municipisArray = [];
+let moviesArray = [];
+let earthMeteoritesArray = [];
 let combinedDataArray = [];
+// Variable para almacenar el tipo de datos seleccionado
+let selectedDataType = "pokemon"; // Por defecto, cargar datos de Pokémon
 
-
-
+// Función para cargar datos según el tipo seleccionado
+function loadDataByType() {
+  switch (selectedDataType) {
+    case "pokemon":
+      return pokemonArray;
+    case "municipis":
+      return municipisArray;
+    case "movies":
+      return moviesArray;
+    case "earthMeteorites":
+      return earthMeteoritesArray;
+    default:
+      return [];
+  }
+}
 
 function reloadPage() {
   location.reload();
 }
 
+
+
+// Obtenir dades de POKÉMONS
+fetch("js/data/pokemon.json")
+  .then((response) => response.json())
+  .then((data) => {
+    pokemonData = data.pokemon;
+
+    // Continuar amb la sol·licitud de MUNICIPIS
+    return fetch("js/data/municipis.json");
+  })
+  .then((response) => response.json())
+  .then((data) => {
+    municipisData = data.elements || []; // Si no hi ha informació de municipi, utilitzar un array buit
+
+    // Continuar amb la sol·licitud de MOVIES
+    return fetch("js/data/movies.json");
+  })
+  .then((response) => response.json())
+  .then((data) => {
+    moviesData = data.movies || []; // Si no hi ha informació de pel·lícules, utilitzar un array buit
+
+    // Continuar amb la sol·licitud de EARTH METEORITES
+    return fetch("js/data/earthMeteorites.json");
+  })
+  .then((response) => response.json())
+  .then((data) => {
+    earthMeteoritesData = data || []; // Si no hi ha informació de meteorits, utilitzar un array buit
+
+    // Combinar informació de Pokémon, Municipis, Pel·lícules i Meteorits
+    pokemonArray = pokemonData.map((pokemon, index) => {
+      // Convertir el pes a un número eliminant el "kg"
+      const numericWeight = parseInt(pokemon.weight, 10);
+
+      // Crear un array para cada Pokémon
+      return [
+        pokemon.id,
+        pokemon.name,
+        pokemon.img,
+        numericWeight, // Ara s'emmagatzema com a número
+      ];
+    });
+
+    municipisArray = municipisData.map((municipiInfo) => [
+      municipiInfo.municipi_nom || "No disponible",
+      municipiInfo.grup_ajuntament.codi_postal || "No disponible",
+      municipiInfo.municipi_escut || "No disponible",
+      municipiInfo.grup_comarca.comarca_nom || "No disponible"
+      
+    ]);
+
+    moviesArray = moviesData.map((movieInfo) => [
+      movieInfo.title || "No disponible",
+      movieInfo.genres || "No disponible",
+      movieInfo.url || "No disponible",
+      movieInfo.rating || "No disponible",
+    ]);
+
+    earthMeteoritesArray = earthMeteoritesData.map((earthMeteoriteInfo) => [
+      earthMeteoriteInfo.name || "No disponible",
+      earthMeteoriteInfo.mass || "No disponible",
+      earthMeteoriteInfo.mass || "No disponible",
+      earthMeteoriteInfo.year || "No disponible",
+
+    ]);
+
+    // Combinar todos los arrays individuales en uno solo
+    combinedDataArray = [...pokemonArray, ...municipisArray, ...moviesArray, ...earthMeteoritesArray];
+
+    // Mostrar la informació en una taula a la consola
+    console.table(combinedDataArray);
+  })
+  .catch((error) => {
+    console.error("Error en obtenir els fitxers JSON:", error);
+  });
+
+
 function orderList(order) {
-  // Verificar que el parámetro es "asc" o "desc"
+  // Verificar que el paràmetre és "asc" o "desc"
   if (order !== "asc" && order !== "desc") {
-    console.error("Orden no válida. Use 'asc' o 'desc'.");
+    console.error("Ordre no vàlid. Utilitza 'asc' o 'desc'.");
     return;
   }
 
-  // Copiar el array para no modificar el original
+  // Copiar l'array per no modificar l'original
   const orderedArray = [...combinedDataArray];
-  
-  // Ordenar el array en función del parámetro
-  orderedArray.sort((a, b) => {
-    const compareValueA = a[1].toLowerCase(); // Modifica según la columna que deseas ordenar
-    const compareValueB = b[1].toLowerCase(); // Modifica según la columna que deseas ordenar
 
-    if (order === "asc") {
-      return compareValueA.localeCompare(compareValueB);
-    } else {
-      return compareValueB.localeCompare(compareValueA);
-    }
-  });
+// Ordenar l'array en funció del paràmetre
+orderedArray.sort((a, b) => {
+  const compareValueA = (a[1] || '').toLowerCase(); // Verificar si a[1] existe
+  const compareValueB = (b[1] || '').toLowerCase(); // Verificar si b[1] existe
 
-  // Mostrar la información ordenada en la consola
+  if (order === "asc") {
+    return compareValueA.localeCompare(compareValueB);
+  } else {
+    return compareValueB.localeCompare(compareValueA);
+  }
+});
+  // Mostrar la informació ordenada a la consola
   console.table(orderedArray);
 
-  // Volver a imprimir la tabla con los datos ordenados
+  // Tornar a imprimir la taula amb les dades ordenades
   combinedDataArray = orderedArray;
   printList();
 }
 
-function searchList() {
-  // Obtener el valor del cuadro de texto
-  const searchTerm = document.getElementById("searchInput").value;
+// Línia per fer que el cercador funcioni amb la tecla Enter
+const searchInput = document.getElementById("searchInput");
 
-  // Verificar si se ingresó un valor
+// Afegir un esdeveniment d'escolta per la tecla "Enter"
+searchInput.addEventListener("keyup", function (event) {
+  // Verificar si la tecla premuda és "Enter" (codi 13)
+  if (event.key === "Enter") {
+    // Executar la funció searchList
+    searchList();
+  }
+});
+
+function searchList() {
+  const searchTerm = searchInput.value;
+  // Obtenir el valor del quadre de text
+
+  // Verificar si s'ha introduït un valor
   if (searchTerm === "") {
-    console.error("Nombre del Pokémon no válido.");
+    console.error("Nom del Pokémon no vàlid.");
     return;
   }
 
-  // Buscar la posición del Pokémon en el array
-  const index = combinedDataArray.findIndex((pokemon) =>
-    pokemon[1].toLowerCase() === searchTerm.toLowerCase()
+  // Buscar la posició del Pokémon a l'array
+  const index = combinedDataArray.findIndex(
+    (pokemon) => pokemon[1].toLowerCase() === searchTerm.toLowerCase()
   );
 
-  // Verificar si se encontró el Pokémon
+  // Verificar si s'ha trobat el Pokémon
   if (index !== -1) {
-    console.log(`La posición del Pokémon "${searchTerm}" es: ${index + 1}`);
+    console.log(`La posició del Pokémon "${searchTerm}" és: ${index + 1}`);
 
-    // Limpiar el contenido anterior del contenedor
+    // Netegar el contingut anterior del contenidor
     const tableContainer = document.getElementById("resultat");
     tableContainer.innerHTML = "";
 
-    // Crear una tabla HTML con una sola fila que contiene el resultado de la búsqueda
+    // Crear una taula HTML amb una sola fila que contingui el resultat de la cerca
     const table = document.createElement("table");
     table.classList.add("pokemon-table");
 
     const headerRow = table.createTHead().insertRow();
-    ["ID", "Nombre", "Imagen", "Peso", "Municipio", "Película", "Meteorito"].forEach((headerText) => {
+    [
+      "ID",
+      "Nom",
+      "Imatge",
+      "Pes",
+      "Municipi",
+      "Pel·lícula",
+      "Meteorit",
+    ].forEach((headerText) => {
       const th = document.createElement("th");
       th.textContent = headerText;
       headerRow.appendChild(th);
@@ -81,53 +196,54 @@ function searchList() {
     combinedDataArray[index].forEach((cellData, cellIndex) => {
       const cell = row.insertCell();
 
-      // Si es la columna de imagen, crea un elemento de imagen en lugar de texto
+      // Si és la columna de la imatge, crear un element d'imatge en lloc de text
       if (cellIndex === 2 && cellData) {
         const img = document.createElement("img");
         img.src = cellData;
-        img.alt = "Pokemon Image";
-        img.style.width = "50px"; // Ajusta el ancho según sea necesario
+        img.alt = "Imatge del Pokémon";
+        img.style.width = "50px"; // Ajustar l'amplada segons sigui necessari
         cell.appendChild(img);
       } else {
         cell.textContent = cellData;
       }
     });
 
-    // Agregar la tabla al contenedor
+    // Afegir la taula al contenidor
     tableContainer.appendChild(table);
 
-    return index + 1; // Devolver la posición (considerando que los índices comienzan en 0)
+    return index + 1; // Tornar la posició (considerant que els índexs comencen a 0)
   } else {
-    console.log(`El Pokémon "${searchTerm}" no fue encontrado.`);
-    return -1; // Devolver -1 si el Pokémon no fue encontrado
+    console.log(`El Pokémon "${searchTerm}" no s'ha trobat.`);
+    return -1; // Tornar -1 si el Pokémon no s'ha trobat
   }
 }
 
-
 function calcMitjana() {
-  // Obtener los pesos de todos los Pokémon
+  // Obtenir els pesos de tots els Pokémon
   const pesos = combinedDataArray.map((pokemonData) => pokemonData[3]);
 
-  // Verificar si hay pesos para calcular la media
+  // Verificar si hi ha pesos per calcular la mitjana
   if (pesos.length === 0) {
-    alert("No hay pesos disponibles para calcular la media.");
+    alert("No hi ha pesos disponibles per calcular la mitjana.");
     return;
   }
 
-  // Calcular la media
-  const media = pesos.reduce((sum, peso) => sum + peso, 0) / pesos.length;
+  // Calcular la mitjana
+  const mitjana = pesos.reduce((sum, peso) => sum + peso, 0) / pesos.length;
 
-  // Mostrar la media usando alert
-  alert(`La media de los pesos es: ${media.toFixed(2)}kg`);
+  // Mostrar la mitjana amb alerta
+  alert(`La mitjana dels pesos és: ${mitjana.toFixed(2)}kg`);
 
-  // También puedes devolver la media si es necesario
-  return media;
+  // També pots tornar la mitjana si és necessari
+  return mitjana;
 }
-
 
 function printList() {
   // Obtener el div donde se mostrará la tabla
   const tableContainer = document.getElementById("resultat");
+
+  // Obtener el array correspondiente al tipo de datos seleccionado
+  const selectedArray = loadDataByType();
 
   // Crear una tabla HTML
   const table = document.createElement("table");
@@ -135,25 +251,47 @@ function printList() {
 
   // Crear la cabecera de la tabla
   const headerRow = table.createTHead().insertRow();
-  ["ID", "Nombre", "Imagen", "Peso", /*"Municipio", "Película", "Meteorito"*/].forEach((headerText) => {
+
+  let columnNames;
+  switch (selectedDataType) {
+    case "pokemon":
+      columnNames = ["ID", "Nombre", "Imagen", "Peso"];
+      break;
+    case "municipis":
+      columnNames = ["Nom", "Codi Postal", "Escut", "Comarca"];
+      break;
+    case "movies":
+      columnNames = ["Nom", "Gènere", "Imagen", "Puntuació"];
+      break;
+    case "earthMeteorites":
+      columnNames = ["Nombre", "Massa", "Imagen", "data"];
+      break;
+    default:
+      columnNames = [];
+  }
+
+
+
+
+columnNames.forEach((headerText) => {
     const th = document.createElement("th");
     th.textContent = headerText;
     headerRow.appendChild(th);
   });
 
-  // Crear el cuerpo de la tabla con los datos
+  // Crear el cuerpo de la tabla con los datos del array seleccionado
   const tbody = table.createTBody();
-  combinedDataArray.forEach((pokemonData) => {
+  selectedArray.forEach((data) => {
     const row = tbody.insertRow();
-    pokemonData.forEach((cellData, cellIndex) => {
+    data.forEach((cellData, cellIndex) => {
       const cell = row.insertCell();
 
-      // Si es la columna de imagen, crea un elemento de imagen en lugar de texto
+      // Si es la columna de imagen, crear un elemento de imagen en lugar de texto
       if (cellIndex === 2 && cellData) {
         const img = document.createElement("img");
         img.src = cellData;
-        img.alt = "Pokemon Image";
-        img.style.width = "50px"; // Ajusta el ancho según sea necesario
+        img.alt = "Imagen No disponible";
+        img.style.width = "50px"; // Ajustar el ancho según sea necesario
         cell.appendChild(img);
       } else {
         cell.textContent = cellData;
@@ -168,69 +306,20 @@ function printList() {
   tableContainer.appendChild(table);
 }
 
-// Obtener datos de POKEMONS
-fetch("js/data/pokemon.json")
-  .then((response) => response.json())
-  .then((data) => {
-    pokemonData = data.pokemon;
-
-    // Continuar con la solicitud de MUNICIPIS
-    return fetch("js/data/municipis.json");
-  })
-  .then((response) => response.json())
-  .then((data) => {
-    municipisData = data.elements || []; // Si no hay información de municipio, usa un array vacío
-
-    // Continuar con la solicitud de MOVIES
-    return fetch("js/data/movies.json");
-  })
-  .then((response) => response.json())
-  .then((data) => {
-    moviesData = data.movies || []; // Si no hay información de películas, usa un array vacío
-
-    // Continuar con la solicitud de EARTH METEORITES
-    return fetch("js/data/earthMeteorites.json");
-  })
-  .then((response) => response.json())
-  .then((data) => {
-    earthMeteoritesData = data || []; // Si no hay información de meteoritos, usa un array vacío
-
-    // Combinar información de Pokémon, Municipios, Películas y Meteoritos
-    combinedDataArray = pokemonData.map((pokemon, index) => {
-      const municipiInfo = municipisData[index] || {};
-      const movieInfo = moviesData[index] || {};
-      const earthMeteoriteInfo = earthMeteoritesData[index] || {};
-
-      // Convertir el peso a un número eliminando el "kg"
-      const numericWeight = parseInt(pokemon.weight, 10);
-
-      // Crear un array multidimensional para cada Pokémon
-      return [
-        pokemon.id,
-        pokemon.name,
-        pokemon.img,
-        numericWeight, // Ahora se almacena como un número
-        // municipiInfo.municipi_nom || "No disponible",
-        // movieInfo.title || "No disponible",
-        // earthMeteoriteInfo.name || "No disponible"
-      ];
-    });
-
-    // Mostrar la información en una tabla en la consola
-    console.table(combinedDataArray);
-
-   
-  })
-  .catch((error) => {
-    console.error('Error al obtener los archivos JSON:', error);
-  });
 
 
+// Función para actualizar el tipo de datos seleccionado
+function updateSelectedDataType() {
+  const dataTypeSelector = document.getElementById("dataTypeSelector");
+  selectedDataType = dataTypeSelector.value;
 
+  // Volver a imprimir la lista con el nuevo tipo de datos
+  printList();
+}
 
-  // ******** GRÀFIC ********
+// ******** GRÀFIC ********
 
-  // Arrays vacíos
+// Arrays buits
 const arrayLabels = [
   "Grass",
   "Poison",
@@ -246,85 +335,59 @@ const arrayLabels = [
   "Rock",
   "Ice",
   "Ghost",
-  "Dragon"
+  "Dragon",
 ];
 const arrayDadesGraf = [14, 33, 12, 19, 32, 12, 24, 9, 14, 8, 14, 11, 5, 3, 3];
+// Generar un array pel borderColor
+const borderColorArray = Array.from({ length: arrayLabels.length }, () =>
+  getBorderColor()
+);
 
-// Generar un array para el borderColor
-const borderColorArray = Array.from({ length: arrayLabels.length }, () => getRandomColor());
+// Generar un array pel backgroundColor amb opacitat
+const backgroundColorArray = borderColorArray;
 
-// Generar un array para el backgroundColor con opacidad
-const backgroundColorArray = borderColorArray ;
-
-
-// Función para generar un número aleatorio entre min y max
+// Funció per generar un número aleatori entre min i max
 function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Función para generar un color rgba aleatorio
-function getRandomColor() {
+// Funció per generar un color rgba aleatori amb opacitat
+function getBackgroundColor() {
   const r = getRandomNumber(0, 255);
   const g = getRandomNumber(0, 255);
   const b = getRandomNumber(0, 255);
-  return `rgba(${r},${g},${b})`;
+  const opacity = 0.2; // Ajustar l'opacitat segons sigui necessari
+  return `rgba(${r},${g},${b},${opacity})`;
 }
 
-// Usar los arrays generados en el gráfico
-const ctx = document.getElementById('myChart');
+// Funció per generar un color rgba aleatori amb opacitat
+function getBorderColor() {
+  const color = getBackgroundColor();
+  const opacity = 1; // Ajustar l'opacitat segons sigui necessari
+  return `${color},${opacity})`;
+}
+// Utilitzar els arrays generats en el gràfic
+const ctx = document.getElementById("myChart");
 
 new Chart(ctx, {
-  type: 'polarArea',
+  type: "polarArea",
   data: {
     labels: arrayLabels,
-    datasets: [{
-      label: '# of Votes',
-      data: arrayDadesGraf,
-      borderWidth: 1,
-      borderColor: borderColorArray,
-      backgroundColor: backgroundColorArray
-    }]
+    datasets: [
+      {
+        label: "",
+        data: arrayDadesGraf,
+        borderWidth: 2,
+        borderColor: borderColorArray,
+        backgroundColor: backgroundColorArray,
+      },
+    ],
   },
   options: {
     scales: {
       y: {
-        beginAtZero: true
-      }
-    }
-  }
+        beginAtZero: true,
+      },
+    },
+  },
 });
-/*
-// MUNICIPIS
-fetch("js/data/municipis.json")
-.then((response) => response.json())
-.then((data) => {
-	dades = data.elements;		
-	
-	console.log(dades)
-	console.log(dades[0].municipi_nom)
-});
-
-/*
-
-// METEORITS
-fetch("js/data/earthMeteorites.json")
-.then((response) => response.json())
-.then((data) => {
-	dades = data;		
-	
-	console.log(dades)
-	console.log(dades[0].name)
-});
-
-
-// MOVIES
-fetch("js/data/movies.json")
-.then((response) => response.json())
-.then((data) => {
-	dades = data.movies;		
-	
-	console.log(dades)
-	console.log(dades[0].title)
-});
-
-*/

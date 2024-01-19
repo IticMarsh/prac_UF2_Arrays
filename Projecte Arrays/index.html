@@ -9,11 +9,21 @@
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
+	<label for="dataTypeSelector">Selecciona el tipo de datos:</label>
+<select id="dataTypeSelector" onchange="updateSelectedDataType()">
+  <option value="pokemon">Pokémon</option>
+  <option value="municipis">Municipis</option>
+  <option value="movies">Películas</option>
+  <option value="earthMeteorites">Meteoritos</option>
+</select>
+
+
 	<!-- BOTONS -->
 	<button onclick="reloadPage()">Recarregar Pàgina</button>
 	<button onclick="orderList('asc')">Ordenar Ascendente</button>
 	<button onclick="orderList('desc')">Ordenar Descendente</button>
-	<input type="text" id="searchInput" placeholder="Nombre del Pokémon">
+	<input type="text" id="searchInput" placeholder="Nom del Pokémon">
 	<button onclick="searchList()">Buscar</button>
 	<button onclick="calcMitjana()">Mitjana</button>
 	<button onclick="printList()">Imprimir</button>
