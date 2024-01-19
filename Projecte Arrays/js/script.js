@@ -319,6 +319,39 @@ function updateSelectedDataType() {
 
 // ******** GRÀFIC ********
 
+
+// Obtenir dades de POKÉMONS
+fetch("js/data/pokemon.json")
+  .then((response) => response.json())
+  .then((data) => {
+    let tiposPokemon = [];
+    let cantidadPorTipo = [];
+
+   // Obtenir dades de POKÉMONS
+fetch("js/data/pokemon.json")
+.then((response) => response.json())
+.then((data) => {
+  // Resto del código para procesar los datos y llenar los arrays
+  data.pokemon.forEach((pokemon) => {
+    const tipo = pokemon.type.join(', ');
+    const index = tiposPokemon.indexOf(tipo);
+
+    if (index !== -1) {
+      cantidadPorTipo[index]++;
+    } else {
+      tiposPokemon.push(tipo);
+      cantidadPorTipo.push(1);
+    }
+  });
+
+});
+
+
+
+
+
+
+
 // Arrays buits
 const arrayLabels = [
   "Grass",
@@ -337,10 +370,11 @@ const arrayLabels = [
   "Ghost",
   "Dragon",
 ];
+
 const arrayDadesGraf = [14, 33, 12, 19, 32, 12, 24, 9, 14, 8, 14, 11, 5, 3, 3];
 // Generar un array pel borderColor
 const borderColorArray = Array.from({ length: arrayLabels.length }, () =>
-  getBorderColor()
+getBorderColor()
 );
 
 // Generar un array pel backgroundColor amb opacitat
@@ -390,4 +424,4 @@ new Chart(ctx, {
       },
     },
   },
-});
+});})
